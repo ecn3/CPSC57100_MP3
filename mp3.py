@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from constraint import *
 
+
 # Formats
 fm1 = "Number of Possible Degree Plans is {}"
 
@@ -66,7 +67,9 @@ def get_possible_course_list(start, finish):
     
     
     # CS Electives course terms (-x = elective not taken)
-
+    all_elective_courses = course_offerings[course_offerings.Type=='elective']
+    elective_courses = all_elective_courses.sample(3)
+    elective_courses_not_taken = all_elective_courses.drop(elective_courses.index)
     
     # Capstone
     
@@ -81,7 +84,6 @@ def get_possible_course_list(start, finish):
 
 
     # Prereqs    
-    
     
     """ ...TO HERE """
     

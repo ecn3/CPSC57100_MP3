@@ -54,8 +54,8 @@ def get_possible_course_list(start, finish):
     
     # Read course_offerings file
     course_offerings = pd.read_excel('csp_course_rotations.xlsx', sheet_name='course_rotations')
-    #course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs')
-    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs_test') #switch to above when added new courses
+    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs')
+    #course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs_test') #switch to above when added new courses
 
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
@@ -70,13 +70,13 @@ def get_possible_course_list(start, finish):
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
 
     # CS Electives course terms (-x = elective not taken)
-    '''
-    elective_courses = course_offerings[course_offerings.Type=='elective']
+
+    all_elective_courses = course_offerings[course_offerings.Type=='elective']
+    # Control electives - exactly 3 courses must be chosen
+    elective_courses = all_elective_courses.sample(3)
+    elective_courses_not_taken = all_elective_courses.drop(elective_courses.index)
     for r,row in elective_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-    '''
-
-    # label elective as not taken, add to not taken list
 
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
@@ -88,18 +88,15 @@ def get_possible_course_list(start, finish):
     problem.addConstraint(AllDifferentConstraint()) # Makes sure no classes are duplicated
     
     # Control start and finish terms
-   
-    
-    # Control electives - exactly 3 courses must be chosen
-
+    # get the term then start term assignment at the number given as start, end at number given as end
 
     # Prereqs - DONE
     i = 0
     for preq in course_prereqs.prereq:
         problem.addConstraint(prereq, (course_prereqs.prereq[i], course_prereqs.course[i]))
         i+=1
+
     """ ...TO HERE """
-    
     # Generate a possible solution
     sol = problem.getSolutions()
     print(fm1.format(len(sol))) # format printing to match sample output
