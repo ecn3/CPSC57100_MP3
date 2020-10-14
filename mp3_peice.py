@@ -64,19 +64,20 @@ def get_possible_course_list(start, finish):
 
     """ TODO FROM HERE... """    
     # Core course terms
-    '''
+    
     core_courses = course_offerings[course_offerings.Type=='core']
     for r,row in core_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
 
     # CS Electives course terms (-x = elective not taken)
+    '''
     elective_courses = course_offerings[course_offerings.Type=='elective']
     for r,row in elective_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+    '''
 
     # label elective as not taken, add to not taken list
 
-    '''
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
     for r,row in capstone_courses.iterrows():
