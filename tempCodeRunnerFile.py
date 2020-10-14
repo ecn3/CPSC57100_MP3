@@ -1,0 +1,1 @@
+problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))

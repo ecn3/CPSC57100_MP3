@@ -85,7 +85,10 @@ def get_possible_course_list(start, finish):
     elective_not_taken = all_elective_courses.Course
     
     for r,row in elective_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        term = create_term_list(list(row[row==1].index))
+        term = [t for t in term if t>start] 
+        #term = [t for t in term if t<finish] 
+        problem.addVariable(row.Course, term)
     
 
     # label elective as not taken, add to not taken list
@@ -93,7 +96,11 @@ def get_possible_course_list(start, finish):
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
     for r,row in capstone_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        term = create_term_list(list(row[row==1].index))
+        # Control start and finish terms
+        term = [t for t in term if t>start] 
+        #term = [t for t in term if t<finish] 
+        problem.addVariable(row.Course, term)
     
     
     # Guarantee no repeats of courses
@@ -115,7 +122,6 @@ def get_possible_course_list(start, finish):
     sol = problem.getSolutions()
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
-
     s = pd.Series(sol[0])
     return elective_not_taken, s.sort_values().map(map_to_term_label)
 
