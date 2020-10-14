@@ -13,6 +13,7 @@ from constraint import *
 
 # Formats
 fm1 = "Number of Possible Degree Plans is {}"
+fm2 = "Not Taken          {}"
 
 def create_term_list(terms, years=4):
     '''Create a list of term indexes for years in the future'''
@@ -69,8 +70,8 @@ def get_possible_course_list(start, finish):
     # CS Electives course terms (-x = elective not taken)
     all_elective_courses = course_offerings[course_offerings.Type=='elective']
     elective_courses = all_elective_courses.sample(3)
-    elective_courses_not_taken = all_elective_courses.drop(elective_courses.index)
-    
+    all_elective_courses = all_elective_courses.drop(elective_courses.index)
+    elective_not_taken = all_elective_courses.Course
     # Capstone
     
     
@@ -92,7 +93,7 @@ def get_possible_course_list(start, finish):
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
     s = pd.Series(sol[0])
-    return s.sort_values().map(map_to_term_label)
+    return elective_not_taken, s.sort_values().map(map_to_term_label)
 
 # Print heading
 print("CLASS: Artificial Intelligence, Lewis University")
@@ -102,12 +103,14 @@ print("")
 # Check for possible schedules for all start terms
 for start in [1]:
     print('START TERM = ' + map_to_term_label(start))
-    s = get_possible_course_list(start,start+13)
+    elective_not_taken, s = get_possible_course_list(start,start+13)
     if s.empty:
         print('NO POSSIBLE SCHEDULE!')
     else:
         s2 = pd.Series(s.index.values, index=s)
         print("Sample Degree Plan")
+        for x in elective_not_taken:
+            print(fm2.format(x))
         print(s2.to_string())
     print()
 
