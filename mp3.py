@@ -85,7 +85,12 @@ def get_possible_course_list(start, finish):
 
 
     # Prereqs    
-    
+    course_prereqs = course_prereqs[~course_prereqs.course.isin(elective_not_taken)] # remove classes not taken from preqs
+    i = 0
+    for preq in course_prereqs.prereq:
+        problem.addConstraint(prereq, (course_prereqs.prereq[i], course_prereqs.course[i]))
+        i+=1
+                
     """ ...TO HERE """
     
     # Generate a possible solution
