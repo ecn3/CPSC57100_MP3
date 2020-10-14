@@ -54,7 +54,7 @@ def get_possible_course_list(start, finish):
     
     # Read course_offerings file
     course_offerings = pd.read_excel('csp_course_rotations.xlsx', sheet_name='course_rotations')
-    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs')
+    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs_test') # change back
 
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
@@ -63,43 +63,39 @@ def get_possible_course_list(start, finish):
 
     """ TODO FROM HERE... """    
     # Core course terms
-    core_courses = course_offerings[course_offerings.Type=='core']
-    for r,row in core_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-
+    
+    
     # CS Electives course terms (-x = elective not taken)
-    elective_courses = course_offerings[course_offerings.Type=='elective']
-    for r,row in elective_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
 
+    
     # Capstone
-    capstone_courses = course_offerings[course_offerings.Type=='capstone']
-    for r,row in capstone_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-
+    
+    
     # Guarantee no repeats of courses
     problem.addConstraint(AllDifferentConstraint()) # Makes sure no classes are duplicated
     
     # Control start and finish terms
-
+   
     
     # Control electives - exactly 3 courses must be chosen
-    electives_taken = 0 # add up to 3 max
-    
-    # Prereqs    
-    
-    
+
+
+    # Prereqs 
+    i = 0
+    for preq in course_prereqs.prereq:
+        problem.addConstraint(prereq, (course_prereqs.prereq[i], course_prereqs.course[i]))
+        i+=1
     """ ...TO HERE """
     
     # Generate a possible solution
     sol = problem.getSolutions()
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
+
     s = pd.Series(sol[0])
     return s.sort_values().map(map_to_term_label)
 
 # Print heading
-
 print("CLASS: Artificial Intelligence, Lewis University")
 print("NAME: Christian Nelson")
 print("")
@@ -116,4 +112,3 @@ for start in [1]:
         print("Sample Degree Plan")
         print(s2.to_string())
     print()
-

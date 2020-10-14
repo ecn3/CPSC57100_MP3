@@ -75,11 +75,11 @@ def get_possible_course_list(start, finish):
     problem.addConstraint(AllDifferentConstraint()) # Makes sure no classes are duplicated
     
     # Control start and finish terms
-
+   
     
     # Control electives - exactly 3 courses must be chosen
 
-    
+
     # Prereqs    
     
     
