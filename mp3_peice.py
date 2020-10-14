@@ -61,14 +61,22 @@ def get_possible_course_list(start, finish):
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        term = create_term_list(list(row[row==1].index))
+        # Control start and finish terms
+        term = [t for t in term if t>start] 
+        term = [t for t in term if t<finish] 
+        problem.addVariable(row.Course, term)
 
     """ TODO FROM HERE... """    
     # Core course terms
     
     core_courses = course_offerings[course_offerings.Type=='core']
     for r,row in core_courses.iterrows():
-        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        term = create_term_list(list(row[row==1].index))
+        # Control start and finish terms
+        term = [t for t in term if t>start] 
+        term = [t for t in term if t<finish] 
+        problem.addVariable(row.Course, term)
 
     # CS Electives course terms (-x = elective not taken)
     all_elective_courses = course_offerings[course_offerings.Type=='elective']
