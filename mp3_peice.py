@@ -54,7 +54,8 @@ def get_possible_course_list(start, finish):
     
     # Read course_offerings file
     course_offerings = pd.read_excel('csp_course_rotations.xlsx', sheet_name='course_rotations')
-    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs_test') # change back
+    #course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs')
+    course_prereqs = pd.read_excel('csp_course_rotations.xlsx', sheet_name='prereqs_test') #switch to above when added new courses
 
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
@@ -63,15 +64,26 @@ def get_possible_course_list(start, finish):
 
     """ TODO FROM HERE... """    
     # Core course terms
-    
-    
-    # CS Electives course terms (-x = elective not taken)
+    '''
+    core_courses = course_offerings[course_offerings.Type=='core']
+    for r,row in core_courses.iterrows():
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
 
-    
+    # CS Electives course terms (-x = elective not taken)
+    elective_courses = course_offerings[course_offerings.Type=='elective']
+    for r,row in elective_courses.iterrows():
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+
+    # label elective as not taken, add to not taken list
+
+    '''
     # Capstone
+    capstone_courses = course_offerings[course_offerings.Type=='capstone']
+    for r,row in capstone_courses.iterrows():
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
     
     
-    # Guarantee no repeats of courses
+    # Guarantee no repeats of courses - DONE
     problem.addConstraint(AllDifferentConstraint()) # Makes sure no classes are duplicated
     
     # Control start and finish terms
@@ -80,7 +92,7 @@ def get_possible_course_list(start, finish):
     # Control electives - exactly 3 courses must be chosen
 
 
-    # Prereqs 
+    # Prereqs - DONE
     i = 0
     for preq in course_prereqs.prereq:
         problem.addConstraint(prereq, (course_prereqs.prereq[i], course_prereqs.course[i]))
