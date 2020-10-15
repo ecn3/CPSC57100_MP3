@@ -64,17 +64,19 @@ def get_possible_course_list(start, finish):
         term = [t for t in term if t>start] 
         term = [t for t in term if t<finish] 
         problem.addVariable(row.Course, term)
-        print(term)
-
 
     """ TODO FROM HERE... """    
     # Core course terms
     
     
     # CS Electives course terms (-x = elective not taken)
-
-    
-    # Capstone
+    elective_courses = course_offerings[course_offerings.Type=='elective']
+    for r,row in elective_courses.iterrows():
+        term = create_term_list(list(row[row==1].index))
+        for c in row:
+            if c == 1:
+                c = -1
+        problem.addVariable(row.Course, term)
     
     
     # Guarantee no repeats of courses
