@@ -60,14 +60,14 @@ def get_possible_course_list(start, finish):
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
 
     """ TODO FROM HERE... """    
     # Core course terms
     core_courses = course_offerings[course_offerings.Type=='core']
     for r,row in core_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
     # CS Electives course terms (-x = elective not taken)
     k = -1
@@ -76,20 +76,24 @@ def get_possible_course_list(start, finish):
         terms = create_term_list(list(row[row==1].index))
         terms.append(k) # add -1 to each term
         problem.addVariable(row.Course, terms)
-        print(row.Course, terms) # Delete
+        #print(row.Course, terms) # Delete
         k-=1
     
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
     for r,row in capstone_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
     # Guarantee no repeats of courses
     problem.addConstraint(AllDifferentConstraint())
     
     # Control start and finish terms
-
+    not_in = []
+    for n in range(1,24):
+        if (n < start) or (n > finish):
+            not_in.append(n)
+    problem.addConstraint(NotInSetConstraint([not_in]))
     
     # Control electives - exactly 3 courses must be chosen
     problem.addConstraint(SomeInSetConstraint([-1,-2,-3,-4,-5,-6,-7,-8],3, True))

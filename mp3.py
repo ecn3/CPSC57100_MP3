@@ -12,7 +12,6 @@ from constraint import *
 
 # Formats
 fm1 = "Number of Possible Degree Plans is {}"
-fm2 = "Not Taken          {}"
 
 def create_term_list(terms, years=4):
     '''Create a list of term indexes for years in the future'''
@@ -60,76 +59,74 @@ def get_possible_course_list(start, finish):
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        term = [t for t in term if t>start] 
-        term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
 
+    """ TODO FROM HERE... """    
     # Core course terms
     core_courses = course_offerings[course_offerings.Type=='core']
     for r,row in core_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms by removing possible times outside of scope
-        term = [t for t in term if t>start] 
-        term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
-
-    # CS Electives course terms (-x = elective not taken)
-    all_elective_courses = course_offerings[course_offerings.Type=='elective']
-    elective_courses = all_elective_courses.sample(3) # Control electives - exactly 3 courses must be chosen
-    all_elective_courses = all_elective_courses.drop(elective_courses.index)
-    elective_not_taken = all_elective_courses.Course
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
+    # CS Electives course terms (-x = elective not taken)
+    k = -1
+    elective_courses = course_offerings[course_offerings.Type=='elective']
     for r,row in elective_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        term = [t for t in term if t>start] 
-        #term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
-
+        terms = create_term_list(list(row[row==1].index))
+        terms.append(k) # add -1 to each term
+        problem.addVariable(row.Course, terms)
+        #print(row.Course, terms) # Delete
+        k-=1
+    
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
     for r,row in capstone_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        term = [t for t in term if t>start] 
-        #term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
     # Guarantee no repeats of courses
-    problem.addConstraint(AllDifferentConstraint()) # Makes sure no classes are duplicated
-
-    # Prereqs
-    course_prereqs = course_prereqs[~course_prereqs.course.isin(elective_not_taken)] # remove classes not taken from preqs
-
+    problem.addConstraint(AllDifferentConstraint())
+    
+    # Control start and finish terms
+    not_in = []
+    for n in range(1,24):
+        if (n < start) or (n > finish):
+            not_in.append(n)
+    problem.addConstraint(NotInSetConstraint([not_in]))
+    
+    # Control electives - exactly 3 courses must be chosen
+    problem.addConstraint(SomeInSetConstraint([-1,-2,-3,-4,-5,-6,-7,-8],3, True))
+    
+    # Prereqs    
     i = 0
     for preq in course_prereqs.prereq:
         problem.addConstraint(prereq, (course_prereqs.prereq.iloc[i], course_prereqs.course.iloc[i]))
         i+=1
+    
+    """ ...TO HERE """
     
     # Generate a possible solution
     sol = problem.getSolutions()
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
     s = pd.Series(sol[0])
-    return elective_not_taken, s.sort_values().map(map_to_term_label)
+    return s.sort_values().map(map_to_term_label)
 
 # Print heading
 print("CLASS: Artificial Intelligence, Lewis University")
 print("NAME: Christian Nelson")
 print("")
 
-
 # Check for possible schedules for all start terms
 for start in [1]:
     print('START TERM = ' + map_to_term_label(start))
-    elective_not_taken, s = get_possible_course_list(start,start+13)
+    s = get_possible_course_list(start,start+13)
     if s.empty:
         print('NO POSSIBLE SCHEDULE!')
     else:
         s2 = pd.Series(s.index.values, index=s)
         print("Sample Degree Plan")
-        for x in elective_not_taken:
-            print(fm2.format(x))
         print(s2.to_string())
     print()
+
