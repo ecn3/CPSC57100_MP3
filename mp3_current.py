@@ -92,7 +92,7 @@ def get_possible_course_list(start, finish):
 
     
     # Control electives - exactly 3 courses must be chosen
-    problem.addConstraint(SomeInSetConstraint([-1],3, True))
+    problem.addConstraint(SomeInSetConstraint([-1,-2,-3,-4,-5,-6,-7,-8],3, True))
     
     # Prereqs    
     i = 0

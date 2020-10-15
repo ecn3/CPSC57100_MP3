@@ -59,47 +59,37 @@ def get_possible_course_list(start, finish):
     # Foundation course terms
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        term = [t for t in term if t>start] 
-        term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
-   
+        problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+
+    """ TODO FROM HERE... """    
     # Core course terms
-    core_courses = course_offerings[course_offerings.Type=='core']
-    for r,row in core_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        term = [t for t in term if t>start] 
-        term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
-
-    # Capstone
-    capstone_courses = course_offerings[course_offerings.Type=='capstone']
-    for r,row in capstone_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        term = [t for t in term if t>start] 
-        term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
-
+    
     # CS Electives course terms (-x = elective not taken)
+    k = -1
     elective_courses = course_offerings[course_offerings.Type=='elective']
     for r,row in elective_courses.iterrows():
-        term = create_term_list(list(row[row==1].index))
-        # Control start and finish terms
-        #term = [t for t in term if t>start] 
-        #term = [t for t in term if t<finish] 
-        problem.addVariable(row.Course, term)
+        terms = create_term_list(list(row[row==1].index))
+        terms.append(k) # add -1 to each term
+        problem.addVariable(row.Course, terms)
+        print(row.Course, terms) # Delete
+        k-=1
+        
+    
+    # Capstone
+
     
     # Guarantee no repeats of courses
     problem.addConstraint(AllDifferentConstraint())
     
-    # Control electives - exactly 3 courses must be chosen
+    # Control start and finish terms
 
     
-    # Prereqs
+    # Control electives - exactly 3 courses must be chosen
+    problem.addConstraint(SomeInSetConstraint([-1,-2,-3,-4,-5,-6,-7,-8],3, True))
     
+    # Prereqs    
+
     
     """ ...TO HERE """
     
@@ -108,6 +98,7 @@ def get_possible_course_list(start, finish):
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
     s = pd.Series(sol[0])
+    print(s)
     return s.sort_values().map(map_to_term_label)
 
 # Print heading
@@ -115,9 +106,8 @@ print("CLASS: Artificial Intelligence, Lewis University")
 print("NAME: Christian Nelson")
 print("")
 
-
 # Check for possible schedules for all start terms
-for start in [3]:
+for start in [1]:
     print('START TERM = ' + map_to_term_label(start))
     s = get_possible_course_list(start,start+13)
     if s.empty:

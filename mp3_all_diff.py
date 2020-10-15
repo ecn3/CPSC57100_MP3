@@ -60,18 +60,20 @@ def get_possible_course_list(start, finish):
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
 
     """ TODO FROM HERE... """    
     # Core course terms
     
     # CS Electives course terms (-x = elective not taken)
+    k = -1
     elective_courses = course_offerings[course_offerings.Type=='elective']
     for r,row in elective_courses.iterrows():
         terms = create_term_list(list(row[row==1].index))
+        terms.append(k) # add -1 to each term
         problem.addVariable(row.Course, terms)
-        terms.append(-1) # add -1 to each term
         print(row.Course, terms) # Delete
+        k-=1
     
     # Capstone
     

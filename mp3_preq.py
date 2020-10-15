@@ -60,30 +60,28 @@ def get_possible_course_list(start, finish):
     foundation_courses = course_offerings[course_offerings.Type=='foundation']
     for r,row in foundation_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
 
     """ TODO FROM HERE... """    
     # Core course terms
     core_courses = course_offerings[course_offerings.Type=='core']
     for r,row in core_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
     # CS Electives course terms (-x = elective not taken)
-    k = -1
     elective_courses = course_offerings[course_offerings.Type=='elective']
     for r,row in elective_courses.iterrows():
         terms = create_term_list(list(row[row==1].index))
-        terms.append(k) # add -1 to each term
         problem.addVariable(row.Course, terms)
-        print(row.Course, terms) # Delete
-        k-=1
+        terms.append(-1) # add -1 to each term
+        #print(row.Course, terms) # Delete
     
     # Capstone
     capstone_courses = course_offerings[course_offerings.Type=='capstone']
     for r,row in capstone_courses.iterrows():
         problem.addVariable(row.Course, create_term_list(list(row[row==1].index)))
-        print(row.Course, create_term_list(list(row[row==1].index))) # Delete
+        #print(row.Course, create_term_list(list(row[row==1].index))) # Delete
     
     # Guarantee no repeats of courses
     problem.addConstraint(AllDifferentConstraint())
@@ -107,6 +105,7 @@ def get_possible_course_list(start, finish):
     print(fm1.format(len(sol))) # format printing to match sample output
     print("")
     s = pd.Series(sol[0])
+    print(s)
     return s.sort_values().map(map_to_term_label)
 
 # Print heading
